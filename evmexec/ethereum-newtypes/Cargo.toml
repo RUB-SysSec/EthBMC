@@ -1,0 +1,16 @@
+[package]
+name = "ethereum-newtypes"
+version = "0.1.0"
+authors = [""]
+edition = "2018"
+
+[dependencies]
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+hexdecode = "0.2"
+
+
+[dependencies.uint]
+version = "0.4"
+features = ["std"]

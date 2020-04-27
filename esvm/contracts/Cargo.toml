@@ -1,0 +1,10 @@
+[package]
+name = "contracts"
+version = "0.1.0"
+authors = ["Anonymous <anon@anon.com>"]
+
+[dependencies]
+lazy_static = "*"
+yaml-rust = "0.4.2"
+esvm = { path = "../"}
+num_cpus = "1.8.0"

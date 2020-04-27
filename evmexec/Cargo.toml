@@ -1,0 +1,31 @@
+[package]
+name = "evmexec"
+version = "0.1.0"
+authors = [""]
+edition = "2018"
+
+[dependencies]
+serde_json = "1.0"
+serde_derive = "1.0"
+serde = "1.0"
+tempfile = "3.0"
+regex = "1"
+hexdecode = "0.2"
+subprocess = "0.1"
+log = "0.4"
+lazy_static = "1.1"
+
+[dependencies.ethereum-newtypes]
+version = "0.1"
+path = "ethereum-newtypes" 
+
+[dependencies.uint]
+version = "0.4"
+features = ["std"]
+
+[dev-dependencies]
+maplit = "1.0"
+
+[features]
+# verbose error output during some operations, e.g., state parsing, this requires some allocations, thus it is disabled by default
+verbose = []

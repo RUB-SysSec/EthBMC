@@ -1,0 +1,73 @@
+[package]
+name = "esvm"
+version = "0.1.0"
+authors = [""]
+edition = "2018"
+
+[dependencies]
+rocket = "0.4.0"
+rocket_contrib = "0.4.0"
+reqwest = "0.9.4"
+rayon = "1.0.2"
+lazy_static = "1.1.0"
+regex = "1.0.5"
+tiny-keccak = "1.4.2"
+log = "0.4.5"
+time = "0.1"
+chrono = "0.4.6"
+petgraph = "0.4.13"
+evmexec = { path = "../evmexec", features = ["verbose"] }
+ethereum-newtypes = { path = "../evmexec/ethereum-newtypes" }
+parity_connector = { path = "../parity_connector" }
+subprocess = "0.1"
+ena = "0.10.1"
+yaml-rust = "0.4.2"
+bitflags = "1.0.4"
+fern = "0.5.6"
+serde = "1.0.79"
+serde_derive = "1.0.79"
+clap = "2.32.0"
+hexdecode = "0.2"
+crossbeam-channel = "0.2"
+crossbeam = "0.7"
+num_cpus = "1.8.0"
+rand = "0.5.5"
+serde_json = "1.0.32"
+parking_lot = "0.7.1"
+
+[dependencies.uint]
+version = "0.4"
+features = ["std"]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "ethbmc"
+path = "src/main.rs"
+
+[[bin]]
+name = "ethbmc-scheduler"
+path = "bin/scheduler.rs"
+
+[[bin]]
+name = "ethbmc-service"
+path = "bin/service.rs"
+
+[dev-dependencies]
+contracts = { path = "contracts" }
+
+[features]
+default = ["calls", "keccak", "memcopy"]
+
+# compile with statistics features
+stats = []
+
+# compile with call simulation
+calls = []
+
+# compile with keccak handling
+keccak = []
+
+# compile with theory of memcopy utilised
+memcopy = []

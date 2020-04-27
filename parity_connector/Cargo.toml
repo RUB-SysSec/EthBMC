@@ -1,0 +1,26 @@
+[package]
+name = "parity_connector"
+version = "0.1.0"
+authors = [""]
+
+[dependencies]
+jsonrpc-client-core = "0.5.0"
+jsonrpc-client-http = "0.5.0"
+clap = "2.32.0"
+futures = "0.1.25"
+serde = "1.0.79"
+serde_json = "1.0.32"
+serde_derive = "1.0.79"
+serde_test = "1.0.79"
+ethereum-newtypes = { path = "../evmexec/ethereum-newtypes" }
+
+[dependencies.uint]
+version = "0.4"
+features = ["std"]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "paritycli"
