@@ -345,53 +345,61 @@ impl<'a> SmtLib2Builder<'a> {
     }
 
     fn assert_storage_versions(&mut self, node: MVal) {
-        self.memories.insert(node);
-        let op = self.memory[node].op.clone();
-        let name = self.memory[node].name();
-        match op {
-            MemoryOperation::Write256 {
-                parent: par,
-                address: ref waddr,
-                value: ref val,
-            } => {
-                // recursively collect prior updates
-                self.assert_storage_versions(par);
+        let mut current_node = node;
+        loop {
+            self.memories.insert(current_node);
+            let op = self.memory[current_node].op.clone();
+            let name = self.memory[current_node].name();
+            match op {
+                MemoryOperation::Write256 {
+                    parent: par,
+                    address: ref waddr,
+                    value: ref val,
+                } => {
+                    // set parent as the next node to analyze
+                    current_node = par;
 
-                let assert = &format!(
-                    "(= {} (store {} {} {}))",
-                    &name,
-                    self.memory[par].name(),
-                    self.to_smt(waddr),
-                    self.to_smt(val)
-                );
-                self.assert(assert);
-                self.def_array(&name, 256);
-            }
-            MemoryOperation::Init => {
-                self.def_array(&name, 256);
-            }
-            MemoryOperation::MemsetUnlimited {
-                parent: par,
-                index: ref waddr,
-                value: ref val,
-            } => {
-                // recursively collect prior updates
-                self.assert_storage_versions(par);
-
-                let reads =
-                    get_needed_read_indices_cached(self.reads, self.memory, par, self.read_cache);
-
-                for r in reads {
-                    let load = self.to_smt(&sload(self.memory, node, &r));
-                    let ite_load = sload(self.memory, par, &r);
-                    let ite = self.to_smt(&ite(&le(waddr, &r), val, &ite_load));
-
-                    self.assert(&format!("(= {} {})", &load, &ite));
+                    let assert = &format!(
+                        "(= {} (store {} {} {}))",
+                        &name,
+                        self.memory[par].name(),
+                        self.to_smt(waddr),
+                        self.to_smt(val)
+                    );
+                    self.assert(assert);
+                    self.def_array(&name, 256);
                 }
+                MemoryOperation::Init => {
+                    self.def_array(&name, 256);
+                    break;
+                }
+                MemoryOperation::MemsetUnlimited {
+                    parent: par,
+                    index: ref waddr,
+                    value: ref val,
+                } => {
+                    // set parent as the next node to analyze
+                    current_node = par;
 
-                self.def_array(&name, 256);
+                    let reads = get_needed_read_indices_cached(
+                        self.reads,
+                        self.memory,
+                        par,
+                        self.read_cache,
+                    );
+
+                    for r in reads {
+                        let load = self.to_smt(&sload(self.memory, current_node, &r));
+                        let ite_load = sload(self.memory, par, &r);
+                        let ite = self.to_smt(&ite(&le(waddr, &r), val, &ite_load));
+
+                        self.assert(&format!("(= {} {})", &load, &ite));
+                    }
+
+                    self.def_array(&name, 256);
+                }
+                _ => unreachable!(),
             }
-            _ => unreachable!(),
         }
     }
 
@@ -940,11 +948,11 @@ mod tests {
 
         let correct = vec![
             format!(
-                "(assert (= (select {}_storage_1 (_ bv16 256) ) (_ bv0 256)) )",
+                "(assert (= (select {}_storage_0 (_ bv16 256) ) (_ bv0 256)) )",
                 state.account().name
             ),
             format!(
-                "(assert (= (select {}_storage_1 (_ bv0 256) ) (_ bv0 256)) )",
+                "(assert (= (select {}_storage_0 (_ bv0 256) ) (_ bv0 256)) )",
                 state.account().name
             ),
             format!(
