@@ -99,6 +99,31 @@ Note when executing the parity example (examples/parity) we recommend limiting t
 ./target/release/ethbmc -b1 --concrete-copy examples/parity/parity.yml
 ```
 
+#### YAML Format 
+
+The yaml format allows to easily initialise a multi-account environment offline. Under state you list all the accounts which should be present in the environment. Each account gets its address as a key. Additionally you can set the balance of the accounts, the nonce and the code field. Optionally you can supply storage. These are key-value pairs which get loaded as the initial storage of an account, otherwise it is assumed empty. Additionally you must supply a victim address. This is the account from which the analysis is started. See for example the example for analysing the parity hack:
+
+```
+state: 
+    # Wallet
+    0xad62f08b3b9f0ecc7251befbeff80c9bb488fe9:
+        balance: 0x8AC7230489E80000
+        nonce: 0x0
+        code: 606060...
+        storage:
+            0x0: 0xcafecafecafecafecafecafecafecafecafecafe # "owner"
+
+    # Receiver
+    0xcafecafecafecafecafecafecafecafecafecafe:
+        balance: 0x0
+        nonce: 0x0
+        code: 60606...
+
+victim: 0xad62f08b3b9f0ecc7251befbeff80c9bb488fe9
+```
+
+We initialise two accounts, the wallet account, which holds the stub for forwarding all requests to the library, and the Receiver account, the parity library. We additionally supply some funds to it, to simulate a hack of the wallet, as well as setting the first storage variable (0x0) (the variable holding the address of the library contract) to the second account in the environment.
+
 ### Patched Parity Node
 
 For the on-chain analysis (Section 6.2) we used a patched parity node to obtain the storage of an account (the code can be found [here](https://github.com/Joool/openethereum)). You can still use a normal node which supports the web3 API. However, the analysis then does not take storage variables into account (all variables are assumed to be zero). Note to analyze blocks at an earlier time you will need to use a patched archive node.
