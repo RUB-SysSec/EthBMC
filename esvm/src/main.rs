@@ -22,6 +22,7 @@ use yaml_rust::YamlLoader;
 use esvm::{symbolic_analysis, Attack, AttackType, SeEnviroment, Solvers, CONFIG};
 
 fn init_logger(json_mode: bool) -> Result<(), fern::InitError> {
+    fs::create_dir_all("log");
     let level = match env::var_os("RUST_LOG") {
         Some(level) => match level.to_str().unwrap() {
             "info" => log::LevelFilter::Info,
