@@ -52,15 +52,16 @@ impl TransitionWorker {
         let handle = Some(thread::spawn(move || {
             loop {
                 select! {
-                    recv(input, msg) => {
+                    recv(input) -> msg => {
                         let input_state = msg.unwrap(); // channel does not close
                         let transitions = symbolic_step(&input_state);
                         let res = Transition::new(input_state.id, transitions);
                         output.send(res);
                     },
                     // closing signal, shut down worker
-                    recv(kill_switch, msg) => {
-                        debug_assert_eq!(msg, None);
+                    recv(kill_switch) -> msg => {
+                        //debug_assert_eq!(msg, None);
+                        debug_assert!(msg.is_ok());
                         break;
                     }
                 }
@@ -83,7 +84,7 @@ impl SolverWorker {
         let handle = Some(thread::spawn(move || {
             loop {
                 select! {
-                    recv(input, msg) => {
+                    recv(input) -> msg => {
                         let input = msg.unwrap(); // channel does not close
                         let mut res = Vec::with_capacity(input.len());
                         let len = input.len();
@@ -98,8 +99,8 @@ impl SolverWorker {
                         output.send(SolverOutput{ id: input.id, transitions: res});
                     },
                     // closing signal, shut down worker
-                    recv(kill_switch, msg) => {
-                        debug_assert_eq!(msg, None);
+                    recv(kill_switch) -> msg => {
+                        debug_assert!(msg.is_ok());
                         break;
                     }
                 }
@@ -300,7 +301,7 @@ impl SymbolicGraph {
             let mut counter = 0;
 
             loop {
-                if let Ok(next_state) = unprocessed_states.pop() {
+                if let Some(next_state) = unprocessed_states.pop() {
                     counter += 1;
                     if counter >= 20_000 {
                         break;
@@ -355,11 +356,11 @@ impl SymbolicGraph {
 
         loop {
             select! {
-                recv(self.transition_output.receiver, msg) => {
+                recv(self.transition_output.receiver) -> msg => {
                     let Transition{id: next_id, transitions} = msg.unwrap();
                     handle_transitions!(self, next_id, transitions);
                 }
-                recv(self.solver_needed_output.receiver, msg) => {
+                recv(self.solver_needed_output.receiver) -> msg => {
                     let SolverOutput{id: next_id, transitions: conditional } = msg.unwrap();
 
                     for ((state, edge_info), check) in conditional.into_iter() {
@@ -376,7 +377,7 @@ impl SymbolicGraph {
                         self.states.push(state);
                     }
                 }
-                recv(self.solver_not_needed.receiver, msg) => {
+                recv(self.solver_not_needed.receiver) -> msg => {
                     let (next_id, simple) = msg.unwrap();
                     for (state, edge_info) in simple.into_iter() {
                         let id = state.id;
@@ -392,8 +393,8 @@ impl SymbolicGraph {
                         self.states.push(state);
                     }
                 }
-                recv(self.kill_switch_receiver, msg) => {
-                    debug_assert_eq!(msg, None);
+                recv(self.kill_switch_receiver) -> msg => {
+                    debug_assert!(msg.is_ok());
                     break;
                 }
             }

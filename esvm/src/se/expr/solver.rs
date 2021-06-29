@@ -146,11 +146,11 @@ impl SolverPool {
             let worker;
             loop {
                 match self.queue.pop() {
-                    Ok(w) => {
+                    Some(w) => {
                         worker = Some(w);
                         break;
                     }
-                    Err(_) => (),
+                    None => (),
                 }
             }
             worker
