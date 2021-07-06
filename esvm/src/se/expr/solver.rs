@@ -141,8 +141,8 @@ impl SolverPool {
         self.queue.push(worker)
     }
 
-    pub fn initialize_from_formel_builder(&self, builder: &SmtLib2Builder) -> SolverHandle {
-        let worker = {
+    fn retrieve_worker(&self) -> Option<Box<dyn Solver>> {
+        return {
             let worker;
             loop {
                 match self.queue.pop() {
@@ -155,11 +155,59 @@ impl SolverPool {
             }
             worker
         };
+    }
+
+    pub fn initialize_from_formel_builder(&self, builder: &SmtLib2Builder) -> SolverHandle {
+        let worker = self.retrieve_worker();
+
         let mut handle = SolverHandle {
             worker: worker,
             pool: self,
         };
         handle.initialize_from_formel_builder(builder);
         handle
+    }
+
+    // only available for testing
+    #[cfg(test)]
+    pub fn solver_handle(&self) -> SolverHandle {
+        let worker = self.retrieve_worker();
+
+        let mut handle = SolverHandle {
+            worker: worker,
+            pool: self,
+        };
+        handle
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{yice_pool_with_workers, SolverPool};
+
+    const TEST_TIMEOUT: usize = 120;
+
+    #[test]
+    fn yice_solver_pool() {
+        let f_false = String::from(
+            "(declare-const a (_ BitVec 256))
+        (declare-const b (_ BitVec 256))
+        (assert (= a (_ bv10 256)))
+        (assert (= b (_ bv11 256)))
+        (assert (= a b))",
+        );
+
+        let mut pool = yice_pool_with_workers(5, TEST_TIMEOUT);
+        for i in 0..10 {
+            let mut handle = pool.solver_handle();
+            {
+                let mut yice = handle.worker.take().unwrap();
+                for line in f_false.lines() {
+                    yice.push_formula(line);
+                }
+                handle.worker.replace(yice);
+            };
+            assert_eq!(false, handle.check_sat());
+        }
     }
 }

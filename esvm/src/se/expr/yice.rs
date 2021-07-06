@@ -162,7 +162,7 @@ mod tests {
     use super::*;
     use crate::se::expr::bval::const_usize;
 
-    const TEST_TIMEOUT: usize = 120;
+    pub const TEST_TIMEOUT: usize = 120;
 
     #[test]
     fn yice_general_test() {
@@ -211,19 +211,5 @@ mod tests {
         yice.push_formula(&String::from("(declare-const a (_ BitVec 8))"));
         yice.push_formula(&String::from("(assert (= a (_ bv10 8)))"));
         assert_eq!(Some(const_usize(10)), yice.get_value("a"));
-    }
-
-    #[test]
-    fn yice_get_values() {
-        let mut yice = YiceInstance::new(TEST_TIMEOUT);
-
-        yice.push_formula(&String::from("(declare-const a (_ BitVec 256))"));
-        yice.push_formula(&String::from("(assert (= a (_ bv10 256)))"));
-        yice.push_formula(&String::from("(declare-const b (_ BitVec 256))"));
-        yice.push_formula(&String::from("(assert (= b (_ bv11 256)))"));
-        assert_eq!(
-            Some(vec!(const_usize(10), const_usize(11))),
-            yice.get_values(&["a".to_owned(), String::from("b")])
-        );
     }
 }
