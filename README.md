@@ -16,7 +16,7 @@ This is the code repository for our Usenix Security 2020 paper [EthBMC](https://
 To compile and use EthBMC you will need:
 
 - Rust nightly (tested with version 1.44.0)
-- [go-ethereum](https://github.com/ethereum/go-ethereum) stand alone evm; make sure it is in your PATH (tested with version 1.8.27)
+- [evm](https://github.com/ethereum/go-ethereum) stand alone executable; make sure it is in your `$PATH` (originally with version 1.8.17; also tested with 1.10.4 - available in the [Geth & Tools](https://geth.ethereum.org/downloads/) bundle)
 - We offer support for three different smt solvers (tested with yices2 version 2.6.1. Note we recommend Yices2; see Section 6.5 in the paper):
 	- [Z3](https://github.com/Z3Prover/z3)
 	- [Yices2](https://github.com/SRI-CSL/yices2)
