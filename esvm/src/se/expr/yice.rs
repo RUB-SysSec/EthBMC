@@ -162,7 +162,7 @@ mod tests {
     use super::*;
     use crate::se::expr::bval::const_usize;
 
-    pub const TEST_TIMEOUT: usize = 120;
+    const TEST_TIMEOUT: usize = 120;
 
     #[test]
     fn yice_general_test() {

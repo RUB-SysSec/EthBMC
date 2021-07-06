@@ -60,8 +60,7 @@ impl TransitionWorker {
                     },
                     // closing signal, shut down worker
                     recv(kill_switch) -> msg => {
-                        //debug_assert_eq!(msg, None);
-                        debug_assert!(msg.is_ok());
+                        debug_assert!(msg.is_err());
                         break;
                     }
                 }
@@ -100,7 +99,7 @@ impl SolverWorker {
                     },
                     // closing signal, shut down worker
                     recv(kill_switch) -> msg => {
-                        debug_assert!(msg.is_ok());
+                        debug_assert!(msg.is_err());
                         break;
                     }
                 }
@@ -394,7 +393,7 @@ impl SymbolicGraph {
                     }
                 }
                 recv(self.kill_switch_receiver) -> msg => {
-                    debug_assert!(msg.is_ok());
+                    debug_assert!(msg.is_err());
                     break;
                 }
             }
