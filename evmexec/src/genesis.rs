@@ -27,10 +27,27 @@ pub struct Config {
 pub struct Account {
     #[serde(deserialize_with = "wu256_from_usize_str")]
     pub balance: WU256,
+    #[serde(deserialize_with = "code_or_default", default = "default_bytes")]
     pub code: Bytes,
     pub nonce: WU256,
-    #[serde(deserialize_with = "ok_or_default")]
+    #[serde(deserialize_with = "ok_or_default", default = "default_storage")]
     pub storage: HashMap<WU256, WU256>,
+}
+
+fn default_bytes() -> Bytes {
+    vec![].into()
+}
+
+fn code_or_default<'de, D>(deserializer: D) -> Result<Bytes, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let v: Value = Deserialize::deserialize(deserializer)?;
+    Ok(Bytes::deserialize(v).unwrap_or(default_bytes()))
+}
+
+fn default_storage() -> HashMap<WU256, WU256> {
+    HashMap::new()
 }
 
 fn ok_or_default<'de, D>(deserializer: D) -> Result<HashMap<WU256, WU256>, D::Error>
@@ -38,7 +55,7 @@ where
     D: Deserializer<'de>,
 {
     let v: Value = Deserialize::deserialize(deserializer)?;
-    Ok(HashMap::deserialize(v).unwrap_or(HashMap::new()))
+    Ok(HashMap::deserialize(v).unwrap_or(default_storage()))
 }
 
 impl Account {
@@ -273,5 +290,4 @@ mod tests {
         }
     }
 }"#;
-
 }

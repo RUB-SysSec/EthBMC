@@ -5,7 +5,7 @@ use regex::Regex;
 use ethereum_newtypes::{Address, WU256};
 
 lazy_static! {
-    static ref GETH_RE: Regex = Regex::new(r#"\{"pc":(?P<pc>\d+),"op":(?P<op>\d+),.*"memory":"(?P<memory>0x[[:xdigit:]]*)".*"stack":(?P<stack>\[[0-9a-zA-Z",]*\]),"depth":(?P<depth>\d+).*\}"#).unwrap();
+    static ref GETH_RE: Regex = Regex::new(r#"\{"pc":(?P<pc>\d+).*,"op":(?P<op>\d+),.*"memory":"(?P<memory>0x[[:xdigit:]]*)".*"stack":(?P<stack>\[[0-9a-zA-Z",]*\]).*,"depth":(?P<depth>\d+).*\}"#).unwrap();
 
     static ref VALUE_RE: Regex = Regex::new(r#"0x[[:xdigit:]]+"#).unwrap();
 }
