@@ -137,7 +137,6 @@ impl Evm {
             // clear buffer for reuse
             buf.clear();
         }
-        dbg!(&instructions);
 
         let new_state = if cfg!(feature = "verbose") {
             buf.clear();
